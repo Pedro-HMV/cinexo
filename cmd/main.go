@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
+	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -217,6 +220,37 @@ func gameLoop(b *Board) {
 }
 
 func main() {
+	// Check if the program is running in a new terminal window
+	if len(os.Args) < 2 || os.Args[1] != "newterminal" {
+		// Get the path to the current executable
+		exePath, err := os.Executable()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Check the operating system
+		if runtime.GOOS == "windows" {
+			// Run a new cmd.exe window with the current executable
+			cmd := exec.Command("cmd", "/C", "start", "cmd", "/C", exePath, "newterminal")
+			err = cmd.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else if runtime.GOOS == "linux" {
+			// Run a new terminal window with the current executable
+			cmd := exec.Command("x-terminal-emulator", "-e", exePath, "newterminal")
+			err = cmd.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatalf("Unsupported operating system: %s", runtime.GOOS)
+		}
+
+		// Exit the current program
+		return
+	}
+
 	words := map[string][]string{
 		"animals": {"dog", "cat", "bird", "fish"},
 		"colors":  {"red", "blue", "green", "yellow"},
